@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>McHobby's Blog</title><link>http://localhost/</link><description>Recent content on McHobby's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 28 Oct 2022 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost/index.xml" rel="self" type="application/rss+xml"/><item><title>Archives</title><link>http://localhost/archives/</link><pubDate>Fri, 28 Oct 2022 00:00:00 +0000</pubDate><guid>http://localhost/archives/</guid><description/></item><item><title>利用 Pyppeteer + Fiddler 实现半自动抢口罩</title><link>http://localhost/post/2022/03/pyppeteer-fiddler-zskz/</link><pubDate>Sat, 05 Mar 2022 22:56:07 +0800</pubDate><guid>http://localhost/post/2022/03/pyppeteer-fiddler-zskz/</guid><description>&lt;h2 id="序言">序言&lt;/h2>
+&lt;blockquote>
+&lt;p>利益是人类行动的一切动力。&lt;/p>
+&lt;p>&lt;em>——霍尔巴赫&lt;/em>&lt;/p>
+&lt;/blockquote>
+&lt;p>最近疫情形势紧张，口罩供给一直跟不上需求。我所在的城市政府为了让大家都有口罩用，也和其他大城市一样推出了口罩预约系统，所有人每天早上 9 点准时登录网站，拼手速点预约按钮，谁够快谁就能预约到口罩。&lt;/p>
+&lt;p>&lt;img src="http://localhost/post/2022/03/pyppeteer-fiddler-zskz/01.png"
+width="459"
+height="235"
+srcset="http://localhost/post/2022/03/pyppeteer-fiddler-zskz/01_huef082638a510d7f48c8bd09cf457aaa5_13627_480x0_resize_box_3.png 480w, http://localhost/post/2022/03/pyppeteer-fiddler-zskz/01_huef082638a510d7f48c8bd09cf457aaa5_13627_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="预约按钮"
+class="gallery-image"
+data-flex-grow="195"
+data-flex-basis="468px"
+>&lt;/p>
+&lt;p>一开始我也没注意过这个系统，毕竟一个市的人去抢，一般都抢不过……然而后来某个亲戚抢口罩的时候注意到了系统的一个小问题，从而人手抢到了口罩。于是，我开始着手研究这个预约系统。&lt;/p>
+&lt;h2 id="1-利用倒计时读秒-bug-加快进入系统">1. 利用倒计时读秒 Bug 加快进入系统&lt;/h2>
+&lt;p>登录系统后首先发现的一个问题是，倒计时读秒似乎比真实情况慢很多：&lt;/p>
+&lt;p>&lt;img src="http://localhost/post/2022/03/pyppeteer-fiddler-zskz/02.png"
+width="370"
+height="345"
+srcset="http://localhost/post/2022/03/pyppeteer-fiddler-zskz/02_hua11b87ad4349df0b65f2c12c480e8d9a_53734_480x0_resize_box_3.png 480w, http://localhost/post/2022/03/pyppeteer-fiddler-zskz/02_hua11b87ad4349df0b65f2c12c480e8d9a_53734_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="倒计时对比"
+class="gallery-image"
+data-flex-grow="107"
+data-flex-basis="257px"
+>&lt;/p>
+&lt;p>平均情况下 1 分钟的读秒，这个网页要多花 2~3 秒钟。虽然可以通过刷新网页的方式重置计时，然而网站到最后一两分钟的时候访问人数又爆炸多，最后一分钟刷新网页几乎不可能……&lt;/p>
+&lt;p>虽然不知道这个问题是不是故意的（谁这么无聊啊），不过这个问题的严重程度，就连程序猿都要另外实现一个接口，每隔一段时间获取服务器时间重置一下计时。&lt;/p>
+&lt;p>由此可以判断，网页载入的时候必定要获取一次服务器时间，用来计算倒计时剩余时间。再一看前端用了 &lt;code>Vue&lt;/code> 这样前后端分离的框架，那么只需要用一个抓包工具，修改服务器的响应时间，让前端得到错误的服务器时间，就能&lt;strong>比其他正常读秒的人更快看到预约按钮了&lt;/strong>。&lt;/p>
+&lt;p>这里我用了 Fiddler，一个大名鼎鼎的 Windows 系统代（zhua）理（bao）工具。预约网站本身连 &lt;code>https&lt;/code> 都没有，甚至连配证书的功夫都省了，直接上抓包日志：&lt;/p>
+&lt;p>&lt;img src="http://localhost/post/2022/03/pyppeteer-fiddler-zskz/04.png"
+width="337"
+height="391"
+srcset="http://localhost/post/2022/03/pyppeteer-fiddler-zskz/04_hu14846495f3e8b4a7b77e0da4f8c33df7_15506_480x0_resize_box_3.png 480w, http://localhost/post/2022/03/pyppeteer-fiddler-zskz/04_hu14846495f3e8b4a7b77e0da4f8c33df7_15506_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="原始抓包结果"
+class="gallery-image"
+data-flex-grow="86"
+data-flex-basis="206px"
+>&lt;/p>
+&lt;p>可以判断出 &lt;code>time&lt;/code> 应该是后端本身封装的响应属性，而 &lt;code>data.currentTime&lt;/code> 应该就是前端读取的服务器时间了，修改这个值就够了。&lt;/p>
+&lt;p>在 Fiddler 点击 &lt;code>Rules -&amp;gt; Customize Rules...&lt;/code>，在打开的 Fiddler ScriptEditor 中查找函数 &lt;code>OnBeforeResponse&lt;/code>，Fiddler 就是在返回响应前调用了这个函数，我们利用提供的 &lt;code>oSession&lt;/code> 变量修改响应包中的 &lt;code>data.currentTime&lt;/code> 就好了。核心代码如下：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-c#" data-lang="c#">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">var&lt;/span> &lt;span class="n">modTime&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">DateTime&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Now&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">AddMinutes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="m">20&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">var&lt;/span> &lt;span class="n">timeStr&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">modTime&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">ToString&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;yyyy-MM-dd HH:mm:ss&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">obj&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">JSONObject&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">&amp;#34;time&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">timeStr&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">oSession&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">uriContains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;getNewOrder&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">obj&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">JSONObject&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">&amp;#34;data&amp;#34;&lt;/span>&lt;span class="p">][&lt;/span>&lt;span class="s">&amp;#34;currentTime&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">timeStr&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">oSession&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">uriContains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;serverTime&amp;#34;&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">obj&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">JSONObject&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">&amp;#34;data&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">timeStr&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这里我保险起见，连 &lt;code>time&lt;/code> 也一起修改了。而修改 &lt;code>data&lt;/code> 本身是因为过一段时间后，前端会向后端请求服务器时间、重置倒计时，因此针对 URI 中含有 &lt;code>serverTime&lt;/code> 的响应也进行了修改。有意思的地方是，Fiddler 这个 Rule 脚本的语言是 &lt;code>C#&lt;/code>，我一开始并不知道，为了一句简单的 &lt;code>DateTime.Now&lt;/code> 还查了好久的官方文档，到处碰壁 🤦‍&lt;/p>
+&lt;p>现在就能比正常人更快看到预约按钮了（如下图）！但是仅仅靠这个还不够，因为提早看到按钮不代表能早于开抢时间进行预约，更不代表你能比其他人更准时地点那个按钮……&lt;/p>
+&lt;p>&lt;img src="http://localhost/05.png"
+loading="lazy"
+alt="我图五哪去了"
+>&lt;/p>
+&lt;h2 id="2-油猴注入-js-脚本实现自动点击">2. 油猴注入 JS 脚本实现自动点击&lt;/h2>
+&lt;p>既然人手难以保证准时准点按下预约按钮，下一步就是考虑怎么让电脑自动按按钮了。&lt;/p>
+&lt;p>由于绝大多数情况下，服务器时间和本地时间并不一致，不能简单地按照本地时间进行操作。然而要和服务器校准时间也很难……于是决定采用最暴力的方法，从某个时间开始，每隔一小段时间就按一次按钮。&lt;/p>
+&lt;p>由于按按钮只是触发了按钮对应 DOM 的 &lt;code>click&lt;/code> 事件，只需要原生 JS 脚本就能做到。再利用 &lt;code>setTimeout&lt;/code> 模拟倒计时（比网页自己实现的那个要准），就可以做到在某个时刻按下按钮了：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-javascript" data-lang="javascript">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// Set the target time
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kd">let&lt;/span> &lt;span class="nx">target&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nb">Date&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">setHours&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">setMinutes&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">59&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">setSeconds&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">59&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">setMilliseconds&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">500&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;The target time is: &amp;#39;&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">format&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;yyyy-MM-dd hh:mm:ss.S&amp;#39;&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="nx">countDown&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getTime&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nb">Date&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">getTime&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;countDown:&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">countDown&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">setTimeout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">function&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">interval&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">setInterval&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">function&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;click&amp;#39;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">document&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">getElementById&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;hq_btn&amp;#39;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">click&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">},&lt;/span> &lt;span class="mi">300&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">setTimeout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">function&lt;/span> &lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">clearInterval&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">interval&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;Done&amp;#39;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">},&lt;/span> &lt;span class="mi">2500&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">},&lt;/span> &lt;span class="nx">countDown&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>博客开坑了</title><link>http://localhost/post/2020/03/creating-blog/</link><pubDate>Thu, 05 Mar 2020 20:37:35 +0800</pubDate><guid>http://localhost/post/2020/03/creating-blog/</guid><description>&lt;blockquote>
+&lt;p>我又回来了（笑&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="曾经">曾经&lt;/h2>
+&lt;p>之前高中的时候有过一段写博客的经历。&lt;/p>
+&lt;p>当时因为是处于全力学习的阶段，难免会忘记。在老师的要求下开了 CSDN 学习笔记博客，写的时候温习知识、需要时当复习材料。不得不说起到了很好的助学效果。&lt;/p>
+&lt;p>上了大学以后我觉得我已经不需要维护博客这种东西了。又不是学习笔记，要花时间写，这么麻烦的事情谁想搞 _(:з)∠)_&lt;/p>
+&lt;h2 id="现在">现在&lt;/h2>
+&lt;p>到了现在，突然发现自己真的是学什么忘什么，比如在软件工坊课上学了没多久的 Flask，Bootstrap，RequireJS 这些东西，半年后通通忘光。这些知识不需要用的时候忘掉无所谓；需要用的时候又要扒资料重新学，太难受了。&lt;/p>
+&lt;p>于是博客又重新开坑了。不用 CSDN，是因为怕有什么奇怪的内容发不出去 (?)；另外可以尝鲜一下静态博客生成器，也不错。&lt;/p>
+&lt;p>这次用的是 &lt;a class="link" href="https://gohugo.io/getting-started/quick-start/" target="_blank" rel="noopener"
+>Hugo&lt;/a>，感觉只要不是重度魔改，足够用了。博客的内容才是关键不是嘛（&lt;/p>
+&lt;p>今后加油吧。尽量抽空写。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;del>P.S. 感谢学长 &lt;a class="link" href="https://rainysummerluo.github.io/" target="_blank" rel="noopener"
+>RainySummerLuo&lt;/a> 推荐的 Hexo 主题 &lt;a class="link" href="https://github.com/yanm1ng/hexo-theme-vexo" target="_blank" rel="noopener"
+>Vexo&lt;/a>，真的是一眼对上口味😂&lt;/del>&lt;/p>
+&lt;p>&lt;strong>2022-10-28 更新&lt;/strong>：Vexo 貌似已经不适配新版 Hugo 了，伤心😢&lt;/p>
+&lt;/blockquote></description></item><item><title>Search</title><link>http://localhost/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://localhost/search/</guid><description/></item></channel></rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>日常 on McHobby's Blog</title><link>http://localhost/tags/%E6%97%A5%E5%B8%B8/</link><description>Recent content in 日常 on McHobby's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 05 Mar 2020 20:37:35 +0800</lastBuildDate><atom:link href="http://localhost/tags/%E6%97%A5%E5%B8%B8/index.xml" rel="self" type="application/rss+xml"/><item><title>博客开坑了</title><link>http://localhost/post/2020/03/creating-blog/</link><pubDate>Thu, 05 Mar 2020 20:37:35 +0800</pubDate><guid>http://localhost/post/2020/03/creating-blog/</guid><description>&lt;blockquote>
+&lt;p>我又回来了（笑&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="曾经">曾经&lt;/h2>
+&lt;p>之前高中的时候有过一段写博客的经历。&lt;/p>
+&lt;p>当时因为是处于全力学习的阶段，难免会忘记。在老师的要求下开了 CSDN 学习笔记博客，写的时候温习知识、需要时当复习材料。不得不说起到了很好的助学效果。&lt;/p>
+&lt;p>上了大学以后我觉得我已经不需要维护博客这种东西了。又不是学习笔记，要花时间写，这么麻烦的事情谁想搞 _(:з)∠)_&lt;/p>
+&lt;h2 id="现在">现在&lt;/h2>
+&lt;p>到了现在，突然发现自己真的是学什么忘什么，比如在软件工坊课上学了没多久的 Flask，Bootstrap，RequireJS 这些东西，半年后通通忘光。这些知识不需要用的时候忘掉无所谓；需要用的时候又要扒资料重新学，太难受了。&lt;/p>
+&lt;p>于是博客又重新开坑了。不用 CSDN，是因为怕有什么奇怪的内容发不出去 (?)；另外可以尝鲜一下静态博客生成器，也不错。&lt;/p>
+&lt;p>这次用的是 &lt;a class="link" href="https://gohugo.io/getting-started/quick-start/" target="_blank" rel="noopener"
+>Hugo&lt;/a>，感觉只要不是重度魔改，足够用了。博客的内容才是关键不是嘛（&lt;/p>
+&lt;p>今后加油吧。尽量抽空写。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;del>P.S. 感谢学长 &lt;a class="link" href="https://rainysummerluo.github.io/" target="_blank" rel="noopener"
+>RainySummerLuo&lt;/a> 推荐的 Hexo 主题 &lt;a class="link" href="https://github.com/yanm1ng/hexo-theme-vexo" target="_blank" rel="noopener"
+>Vexo&lt;/a>，真的是一眼对上口味😂&lt;/del>&lt;/p>
+&lt;p>&lt;strong>2022-10-28 更新&lt;/strong>：Vexo 貌似已经不适配新版 Hugo 了，伤心😢&lt;/p>
+&lt;/blockquote></description></item></channel></rss>
