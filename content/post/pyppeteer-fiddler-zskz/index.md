@@ -5,7 +5,7 @@ date: 2022-03-05T22:56:07+08:00
 lastmod: 2022-03-05T22:56:07+08:00
 image:
 categories: 技术力
-tag:
+tags:
 - 爬虫
 - 乱搞
 - 危险
