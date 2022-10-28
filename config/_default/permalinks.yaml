@@ -1,0 +1,3 @@
+# Permalinks format of each content section
+post: /post/:year/:month/:slugorfilename/
+page: /:slug/
