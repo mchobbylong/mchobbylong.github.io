@@ -1,4 +1,4 @@
-baseURL: http://localhost
+baseURL: https://mchobbylong.github.io
 languageCode: en-us
 title: McHobby's Blog
 paginate: 5
