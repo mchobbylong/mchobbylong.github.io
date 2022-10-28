@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on McHobby's Blog</title><link>https://mchobbylong.github.io/post/</link><description>Recent content in Posts on McHobby's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 05 Mar 2022 22:56:07 +0800</lastBuildDate><atom:link href="https://mchobbylong.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>利用 Pyppeteer + Fiddler 实现半自动抢口罩</title><link>https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/</link><pubDate>Sat, 05 Mar 2022 22:56:07 +0800</pubDate><guid>https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/</guid><description>&lt;h2 id="序言">序言&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on McHobby's Blog</title><link>https://mchobbylong.github.io/post/</link><description>Recent content in Posts on McHobby's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 05 Mar 2020 22:56:07 +0800</lastBuildDate><atom:link href="https://mchobbylong.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>利用 Pyppeteer + Fiddler 实现半自动抢口罩</title><link>https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/</link><pubDate>Thu, 05 Mar 2020 22:56:07 +0800</pubDate><guid>https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/</guid><description>&lt;h2 id="序言">序言&lt;/h2>
 &lt;blockquote>
 &lt;p>利益是人类行动的一切动力。&lt;/p>
 &lt;p>&lt;em>——霍尔巴赫&lt;/em>&lt;/p>
 &lt;/blockquote>
 &lt;p>最近疫情形势紧张，口罩供给一直跟不上需求。我所在的城市政府为了让大家都有口罩用，也和其他大城市一样推出了口罩预约系统，所有人每天早上 9 点准时登录网站，拼手速点预约按钮，谁够快谁就能预约到口罩。&lt;/p>
-&lt;p>&lt;img src="https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/01.png"
+&lt;p>&lt;img src="https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/01.png"
 width="459"
 height="235"
-srcset="https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/01_huef082638a510d7f48c8bd09cf457aaa5_13627_480x0_resize_box_3.png 480w, https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/01_huef082638a510d7f48c8bd09cf457aaa5_13627_1024x0_resize_box_3.png 1024w"
+srcset="https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/01_huef082638a510d7f48c8bd09cf457aaa5_13627_480x0_resize_box_3.png 480w, https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/01_huef082638a510d7f48c8bd09cf457aaa5_13627_1024x0_resize_box_3.png 1024w"
 loading="lazy"
 alt="预约按钮"
 class="gallery-image"
@@ -17,10 +17,10 @@ data-flex-basis="468px"
 &lt;p>一开始我也没注意过这个系统，毕竟一个市的人去抢，一般都抢不过……然而后来某个亲戚抢口罩的时候注意到了系统的一个小问题，从而人手抢到了口罩。于是，我开始着手研究这个预约系统。&lt;/p>
 &lt;h2 id="1-利用倒计时读秒-bug-加快进入系统">1. 利用倒计时读秒 Bug 加快进入系统&lt;/h2>
 &lt;p>登录系统后首先发现的一个问题是，倒计时读秒似乎比真实情况慢很多：&lt;/p>
-&lt;p>&lt;img src="https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/02.png"
+&lt;p>&lt;img src="https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/02.png"
 width="370"
 height="345"
-srcset="https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/02_hua11b87ad4349df0b65f2c12c480e8d9a_53734_480x0_resize_box_3.png 480w, https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/02_hua11b87ad4349df0b65f2c12c480e8d9a_53734_1024x0_resize_box_3.png 1024w"
+srcset="https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/02_hua11b87ad4349df0b65f2c12c480e8d9a_53734_480x0_resize_box_3.png 480w, https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/02_hua11b87ad4349df0b65f2c12c480e8d9a_53734_1024x0_resize_box_3.png 1024w"
 loading="lazy"
 alt="倒计时对比"
 class="gallery-image"
@@ -31,10 +31,10 @@ data-flex-basis="257px"
 &lt;p>虽然不知道这个问题是不是故意的（谁这么无聊啊），不过这个问题的严重程度，就连程序猿都要另外实现一个接口，每隔一段时间获取服务器时间重置一下计时。&lt;/p>
 &lt;p>由此可以判断，网页载入的时候必定要获取一次服务器时间，用来计算倒计时剩余时间。再一看前端用了 &lt;code>Vue&lt;/code> 这样前后端分离的框架，那么只需要用一个抓包工具，修改服务器的响应时间，让前端得到错误的服务器时间，就能&lt;strong>比其他正常读秒的人更快看到预约按钮了&lt;/strong>。&lt;/p>
 &lt;p>这里我用了 Fiddler，一个大名鼎鼎的 Windows 系统代（zhua）理（bao）工具。预约网站本身连 &lt;code>https&lt;/code> 都没有，甚至连配证书的功夫都省了，直接上抓包日志：&lt;/p>
-&lt;p>&lt;img src="https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/04.png"
+&lt;p>&lt;img src="https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/04.png"
 width="337"
 height="391"
-srcset="https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/04_hu14846495f3e8b4a7b77e0da4f8c33df7_15506_480x0_resize_box_3.png 480w, https://mchobbylong.github.io/post/2022/03/pyppeteer-fiddler-zskz/04_hu14846495f3e8b4a7b77e0da4f8c33df7_15506_1024x0_resize_box_3.png 1024w"
+srcset="https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/04_hu14846495f3e8b4a7b77e0da4f8c33df7_15506_480x0_resize_box_3.png 480w, https://mchobbylong.github.io/post/2020/03/pyppeteer-fiddler-zskz/04_hu14846495f3e8b4a7b77e0da4f8c33df7_15506_1024x0_resize_box_3.png 1024w"
 loading="lazy"
 alt="原始抓包结果"
 class="gallery-image"
